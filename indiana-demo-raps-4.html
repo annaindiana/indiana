@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Индиана — демонстрация: переход на рапс, поля хозяйства</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1F2A1C; --paper:#E6E9DF; --panel:#F4F5EF; --panel2:#FBFBF7;
+    --leaf:#2F6B43; --leaf2:#4F9D5D; --ochre:#A9762F; --clay:#9C4F2E;
+    --slate:#33505A; --line:#CCD1C3; --muted:#6B7464;
+    --serif:'Fraunces',Georgia,serif; --sans:'Inter',system-ui,sans-serif; --mono:'IBM Plex Mono','Courier New',monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{font-family:var(--sans);background:#11170F;color:var(--ink);display:flex;align-items:center;justify-content:center;overflow:hidden}
+  .stage{position:relative;width:100vw;height:100vh;max-width:calc(100vh*16/9);max-height:calc(100vw*9/16);background:var(--paper);overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.5)}
+  .serif{font-family:var(--serif)} .mono{font-family:var(--mono)}
+
+  /* ---------- APP CHROME ---------- */
+  .app{position:absolute;inset:0;display:flex;opacity:0;transition:opacity .6s}
+  .app.show{opacity:1}
+  .rail{width:19%;min-width:150px;background:var(--ink);color:#EFF1EA;padding:2.4vh 1.2vw;display:flex;flex-direction:column}
+  .wm{display:flex;gap:.6vw;align-items:center}
+  .horizon{width:.9vw;min-width:12px;height:4vh;min-height:30px;border-radius:3px;background:linear-gradient(#5C8A4C,#3E6B3A 28%,#7B5A2E 55%,#5C3E22 78%,#3A2A18)}
+  .wm-t{font-family:var(--serif);font-weight:600;font-size:clamp(15px,1.7vw,24px)}
+  .wm-s{font-size:clamp(8px,.72vw,11px);color:#9DB096;letter-spacing:.14em;text-transform:uppercase}
+  .nav{margin-top:3vh;display:flex;flex-direction:column;gap:.4vh}
+  .nav div{padding:1vh .8vw;border-radius:8px;font-size:clamp(11px,.95vw,15px);color:#C9D2C2;display:flex;align-items:center;gap:.5vw}
+  .nav div .d{width:6px;height:6px;border-radius:50%;background:currentColor;opacity:.6}
+  .nav div.on{background:var(--leaf);color:#fff}
+  .rail-foot{margin-top:auto;border-top:1px solid rgba(255,255,255,.12);padding-top:1.4vh;font-size:clamp(8px,.7vw,11px);color:#A9BBA2;display:flex;align-items:center;gap:.5vw}
+  .led{width:8px;height:8px;border-radius:50%;background:var(--leaf2);animation:pulse 2.4s infinite}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(79,157,93,.5)}70%{box-shadow:0 0 0 7px rgba(79,157,93,0)}100%{box-shadow:0 0 0 0 rgba(79,157,93,0)}}
+
+  .main{flex:1;min-width:0;display:flex;flex-direction:column}
+  .topbar{padding:2vh 2vw;border-bottom:1px solid var(--line);background:var(--panel2)}
+  .topbar h2{font-family:var(--serif);font-size:clamp(17px,1.7vw,26px)}
+  .topbar .sub{font-size:clamp(10px,.9vw,14px);color:var(--muted);margin-top:.4vh}
+  .scroll{flex:1;overflow:hidden;position:relative}
+  .pad{padding:2.4vh 2vw}
+
+  .eyebrow{font-size:clamp(9px,.72vw,11px);letter-spacing:.16em;text-transform:uppercase;color:var(--leaf);font-weight:600}
+  .card{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:2.2vh 1.6vw}
+  .lab{display:block;font-size:clamp(10px,.82vw,13px);font-weight:600;color:var(--muted);margin-bottom:.6vh}
+  .fld{border:1px solid var(--line);border-radius:9px;padding:1.1vh .9vw;background:#fff;font-size:clamp(11px,.95vw,15px);min-height:2.2em}
+  .grid3{display:flex;gap:.9vw;margin-bottom:1.4vh}
+  .grid3>div{flex:1}
+  .caret::after{content:'▏';color:var(--leaf);animation:blink 1s steps(1) infinite}
+  @keyframes blink{50%{opacity:0}}
+  .btn{background:var(--leaf);color:#fff;border:none;border-radius:9px;padding:1.2vh 1.4vw;font-size:clamp(12px,1vw,15px);font-weight:600;font-family:var(--sans);display:inline-block;margin-top:1.8vh}
+  .btn.pulse{animation:btnp .5s ease 2}
+  @keyframes btnp{50%{transform:scale(1.05);box-shadow:0 0 0 6px rgba(47,107,67,.18)}}
+
+  /* chat */
+  .thread{display:flex;flex-direction:column;gap:1.4vh;margin-bottom:1.8vh}
+  .bub{max-width:82%;padding:1.3vh 1vw;border-radius:14px;font-size:clamp(11px,.95vw,15px);white-space:pre-wrap;line-height:1.5}
+  .bub.me{align-self:flex-end;background:var(--ink);color:#EFF1EA;border-bottom-right-radius:5px}
+  .bub.ag{align-self:flex-start;background:var(--panel);border:1px solid var(--line);border-bottom-left-radius:5px}
+  .bub .who{font-size:clamp(8px,.66vw,10px);letter-spacing:.1em;text-transform:uppercase;opacity:.7;margin-bottom:.5vh}
+  .dots span{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--leaf2);animation:bl 1.2s infinite;margin-right:4px}
+  .dots span:nth-child(2){animation-delay:.2s}.dots span:nth-child(3){animation-delay:.4s}
+  @keyframes bl{0%,80%,100%{opacity:.25}40%{opacity:1}}
+
+  /* package */
+  .pkg{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  .pkg-head{display:flex;background:var(--ink);color:#EFF1EA}
+  .pkg-spine{width:10px;background:linear-gradient(#5C8A4C,#3E6B3A 30%,#7B5A2E 60%,#3A2A18)}
+  .pkg-head .hh{padding:2vh 1.6vw}
+  .pkg-head .eyebrow{color:#9DC79F}
+  .pkg-head h2{font-family:var(--serif);font-size:clamp(16px,1.5vw,24px);color:#fff;margin-top:.5vh}
+  .pkg-body{padding:0 1.6vw 2vh}
+  .sec{padding:1.6vh 0;border-top:1px solid var(--line)}
+  .sec:first-child{border-top:none}
+  .sec h3{font-size:clamp(10px,.85vw,13px);letter-spacing:.04em;text-transform:uppercase;color:var(--leaf);margin-bottom:.8vh;font-weight:600}
+  .sec p{font-size:clamp(11px,.95vw,15px);line-height:1.55}
+  .steps{list-style:none;counter-reset:s}
+  .steps li{counter-increment:s;position:relative;padding:.8vh 0 .8vh 2vw;font-size:clamp(11px,.92vw,15px);border-bottom:1px dashed var(--line)}
+  .steps li:last-child{border-bottom:none}
+  .steps li::before{content:counter(s,decimal-leading-zero);position:absolute;left:0;top:.8vh;font-family:var(--mono);font-size:clamp(9px,.75vw,12px);color:var(--ochre)}
+  table{width:100%;border-collapse:collapse;font-size:clamp(10px,.88vw,14px)}
+  th{text-align:left;font-size:clamp(8px,.68vw,11px);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:.6vh .6vw;border-bottom:1px solid var(--line)}
+  td{padding:.9vh .6vw;border-bottom:1px solid var(--line);vertical-align:top}
+  .dose{font-family:var(--mono);color:var(--clay);white-space:nowrap}
+  .sched .it{display:flex;gap:1vw;padding:.8vh 0;border-bottom:1px dashed var(--line)}
+  .sched .it:last-child{border-bottom:none}
+  .per{font-family:var(--mono);font-size:clamp(9px,.8vw,13px);color:var(--slate);flex:0 0 12vw}
+  .notes{padding-left:1.2vw;font-size:clamp(10px,.88vw,14px)}
+  .notes li{margin:.4vh 0}
+  .srcs{display:flex;gap:.5vw;flex-wrap:wrap}
+  .src{font-size:clamp(9px,.75vw,12px);background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:.4vh .8vw;color:var(--muted)}
+  .strat{margin-top:2vh;background:#F6EFDD;border:1px solid #E2D2AC;border-radius:14px;padding:2vh 1.6vw}
+  .strat>.eyebrow{color:var(--ochre)}
+  .strat h2{font-family:var(--serif);font-size:clamp(15px,1.4vw,22px);color:var(--ink);margin:.6vh 0 1vh}
+  .chain{display:flex;align-items:center;gap:.55vw;flex-wrap:wrap;margin:1.4vh 0}
+  .chain .node{background:#fff;border:1px solid var(--line);border-radius:9px;padding:.9vh .9vw;font-size:clamp(10px,.85vw,14px);font-weight:600}
+  .chain .node.hi{background:var(--leaf);color:#fff;border-color:var(--leaf)}
+  .chain .arw{color:var(--ochre);font-weight:700;font-size:clamp(12px,1vw,17px)}
+
+  /* overlays */
+  .ov{position:absolute;inset:0;background:var(--ink);color:#EFF1EA;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:1.6vh;transition:opacity .7s;z-index:5;padding:0 6vw}
+  .ov.hide{opacity:0;pointer-events:none}
+  .ov .wm-t{font-size:clamp(30px,4vw,64px)}
+  .ov .kick{font-size:clamp(11px,.9vw,15px);letter-spacing:.2em;text-transform:uppercase;color:#9DC79F}
+  .ov .big{font-family:var(--serif);font-size:clamp(24px,3vw,48px);line-height:1.1;max-width:20ch}
+  .ov .big em{font-style:italic;color:var(--leaf2)}
+  .ov .note{font-size:clamp(11px,.95vw,15px);color:#B6C4AF;max-width:44ch}
+  .replay{margin-top:1vh;background:var(--leaf);color:#fff;border:none;border-radius:10px;padding:1.3vh 2vw;font-size:clamp(12px,1vw,16px);font-weight:600;font-family:var(--sans);cursor:pointer}
+  .bar{position:absolute;left:0;bottom:0;height:4px;background:var(--leaf2);width:0;z-index:6;transition:width .3s linear}
+</style>
+</head>
+<body>
+<div class="stage">
+  <!-- title -->
+  <div class="ov" id="title">
+    <div class="wm" style="justify-content:center"><div class="horizon" style="height:6vh"></div><div style="text-align:left"><div class="wm-t serif">Индиана</div><div class="wm-s">виртуальный агроном</div></div></div>
+    <div class="kick">демонстрация возможностей</div>
+    <div class="note" style="font-size:clamp(13px,1.1vw,18px);color:#DCE6D6">Переход на яровой рапс и рост масличности<br/>Поля хозяйства · Ленинск-Кузнецкий район</div>
+  </div>
+
+  <!-- app -->
+  <div class="app" id="app">
+    <div class="rail">
+      <div class="wm"><div class="horizon"></div><div><div class="wm-t">Индиана</div><div class="wm-s">Агроном в кармане</div></div></div>
+      <div class="nav">
+        <div class="on"><span class="d"></span>Агент</div>
+        <div><span class="d"></span>Личный кабинет</div>
+        <div><span class="d"></span>База знаний</div>
+        <div><span class="d"></span>Аккаунт</div>
+      </div>
+      <div class="rail-foot"><span class="led"></span>локальное хранилище · шифрование</div>
+    </div>
+    <div class="main">
+      <div class="topbar"><h2>Индиана</h2><div class="sub">Опишите проблему почвы или урожая — агент соберёт технологический пакет</div></div>
+      <div class="scroll"><div class="pad" id="pad"></div></div>
+    </div>
+  </div>
+
+  <!-- end -->
+  <div class="ov hide" id="end">
+    <div class="kick">технологический пакет готов</div>
+    <div class="big serif">Сера, а не догадки —<br/><em>масличность под контролем</em></div>
+    <div class="note">Индиана собрала решение по данным полей хозяйства: поднять масличность — и сместить бизнес от сырья к переработке, где остаётся основная маржа.</div>
+    <button class="replay" onclick="location.reload()">↺ Повторить</button>
+  </div>
+
+  <div class="bar" id="bar"></div>
+</div>
+
+<script>
+const pad = document.getElementById('pad');
+const QUERY = "Хочу перейти на яровой рапс на полях хозяйства. Как поднять масличность рапса, чтобы повысить его закупочную стоимость?";
+
+const FORM = `
+  <div class="card">
+    <div class="eyebrow">участок · технологический пакет</div>
+    <div style="height:1.4vh"></div>
+    <div class="grid3">
+      <div><span class="lab">Культура</span><div class="fld" id="f_cult"></div></div>
+      <div><span class="lab">Регион</span><div class="fld" id="f_reg"></div></div>
+      <div><span class="lab">Тип почвы</span><div class="fld" id="f_soil"></div></div>
+    </div>
+    <span class="lab">Данные анализа полей</span>
+    <div class="fld" id="f_lab" style="margin-bottom:1.4vh"></div>
+    <span class="lab">Опишите проблему свободно</span>
+    <div class="fld" id="f_free" style="min-height:6vh"></div>
+    <button class="btn" id="go">Получить решение</button>
+  </div>`;
+
+const CHAT = `
+  <div class="thread">
+    <div class="bub me"><div class="who">Вы</div>${QUERY}</div>
+    <div class="bub ag"><div class="who">Индиана</div><span class="dots"><span></span><span></span><span></span></span> анализирую по базе знаний…</div>
+  </div>`;
+
+const PKG = `
+  <div class="thread">
+    <div class="bub me"><div class="who">Вы</div>${QUERY}</div>
+    <div class="bub ag"><div class="who">Индиана</div>Пакет готов. Масличность растёт за счёт серного питания — а стратегически стоит перейти от продажи сырья к переработке рапса.</div>
+  </div>
+  <div class="pkg">
+    <div class="pkg-head"><div class="pkg-spine"></div><div class="hh"><div class="eyebrow">технологический пакет</div><h2>Переход на яровой рапс: рост масличности — поля хозяйства</h2></div></div>
+    <div class="pkg-body">
+      <div class="sec"><h3>Краткое резюме</h3><p>Масличность и закупочная цена рапса сильнее всего зависят от серного питания при умеренном азоте. По данным ваших полей: калий высокий, азот лимитирует урожай, <b>сера в дефиците</b>, фосфор местами низкий при слабощелочной pH. Настройка серы и азота одновременно поднимает и урожай, и содержание масла.</p></div>
+      <div class="sec"><h3>Вероятная причина низкой масличности</h3><p>Дефицит серы напрямую ограничивает синтез масла у крестоцветных. Несбалансированный (избыточный) азот смещает налив семян в сторону белка и снижает масличность. Низкий фосфор при слабощелочной реакции ослабляет стартовое развитие и налив.</p></div>
+      <div class="sec"><h3>Пошаговый план</h3><ol class="steps">
+        <li>Закрыть дефицит серы: серосодержащее удобрение в основное/ранневесеннее внесение.</li>
+        <li>Нормировать азот по выносу, без перекорма; держать соотношение N:S около 6:1.</li>
+        <li>Дать стартовый фосфор локально при посеве — компенсирует низкий P и щелочную pH.</li>
+        <li>Калий не вносить — на полях хозяйства он в избытке.</li>
+        <li>Добавить бор по листу — критичен для цветения и налива семян рапса.</li>
+        <li>Контроль по листовой диагностике в фазы розетки и бутонизации.</li>
+      </ol></div>
+      <div class="sec"><h3>Препараты и нормы</h3>
+        <table><thead><tr><th>Наименование</th><th>Норма (по д.в.)</th><th>Срок</th></tr></thead><tbody>
+          <tr><td><b>Сульфат аммония / гипс</b><div style="font-size:.82em;color:var(--muted)">источник серы — рычаг масличности</div></td><td class="dose">S 25–40 кг/га</td><td>основное / ранняя весна</td></tr>
+          <tr><td><b>Азот (селитра / КАС), дробно</b></td><td class="dose">N по выносу, N:S≈6:1</td><td>всходы + бутонизация</td></tr>
+          <tr><td><b>Стартовый фосфор (аммофос)</b></td><td class="dose">P₂O₅ 15–25 кг/га</td><td>припосевное, локально</td></tr>
+          <tr><td><b>Бор (по листу)</b></td><td class="dose">B 0.2–0.4 кг/га</td><td>бутонизация</td></tr>
+        </tbody></table></div>
+      <div class="sec"><h3>График применения</h3><div class="sched">
+        <div class="it"><span class="per">предпосев</span><span>Сера в основное внесение + локальный стартовый фосфор</span></div>
+        <div class="it"><span class="per">всходы–розетка</span><span>Первая дробная подкормка азотом</span></div>
+        <div class="it"><span class="per">бутонизация</span><span>Вторая подкормка азотом + бор по листу</span></div>
+        <div class="it"><span class="per">налив семян</span><span>Листовая диагностика; при необходимости — повтор бора</span></div>
+      </div></div>
+      <div class="sec"><h3>Примечания и предостережения</h3><ul class="notes">
+        <li>Точные нормы уточнить по анализу каждого поля и плановому урожаю.</li>
+        <li>Проверить масличный потенциал выбранного гибрида/сорта.</li>
+        <li>Не использовать хлорсодержащие калийные удобрения — калий уже в избытке.</li>
+      </ul></div>
+      <div class="sec"><h3>Источники базы знаний</h3><div class="srcs"><span class="src">Питание рапса и качество масла</span><span class="src">Роль серы у крестоцветных</span><span class="src">Анализ полей хозяйства</span></div></div>
+    </div>
+  </div>
+  <div class="strat">
+    <div class="eyebrow">стратегическая рекомендация</div>
+    <h2>От сырья — к переработке рапса</h2>
+    <p style="font-size:clamp(11px,.95vw,15px);line-height:1.55">Наибольший рост стоимости — не в цене зерна, а в переходе от продажи сырья к продуктам переработки. Высокая масличность из плана выше напрямую увеличивает выход масла и рентабельность переработки.</p>
+    <div class="chain">
+      <span class="node">Рапс-сырьё</span><span class="arw">→</span>
+      <span class="node hi">Холодный отжим</span><span class="arw">→</span>
+      <span class="node">Масло + жмых</span><span class="arw">→</span>
+      <span class="node">Продукт под брендом</span>
+    </div>
+    <div class="sec"><h3>Два потока выручки из одной тонны</h3><ul class="notes">
+      <li><b>Масло</b> — около 40%+ от массы семян: пищевое холодного отжима под своим брендом либо техническое.</li>
+      <li><b>Жмых / шрот</b> — 55–60%: высокобелковый корм, готовый спрос у животноводов региона.</li>
+    </ul></div>
+    <div class="sec"><h3>Путь смещения бизнеса</h3><ol class="steps">
+      <li>Старт с малотоннажного отжима (мини-маслопресс) — низкий порог входа.</li>
+      <li>Масло — под собственным брендом на локальный рынок, а не оптом трейдеру.</li>
+      <li>Жмых — животноводам: второй поток дохода без дополнительных вложений.</li>
+      <li>Масличность из агропакета → больше масла с тонны → выше маржа.</li>
+      <li>По мере роста — рафинация, фасовка, глубокая переработка.</li>
+    </ol></div>
+    <div class="sec" style="border-bottom:none"><h3>Почему это выгодно</h3><p>Маржа переработки остаётся у хозяйства, а не уходит посреднику. Вы продаёте не биржевое сырьё с плавающей ценой, а готовый продукт с добавленной стоимостью и своим именем.</p></div>
+  </div>`;
+
+// ---- timeline ----
+function type(el, text, cps){ return new Promise(res=>{ let i=0; el.classList.add('caret'); const iv=setInterval(()=>{ el.textContent=text.slice(0,++i); if(i>=text.length){clearInterval(iv); el.classList.remove('caret'); res();}}, 1000/cps); }); }
+const wait = ms => new Promise(r=>setTimeout(r,ms));
+function setBar(p){ document.getElementById('bar').style.width = (p*100)+'%'; }
+function autoScroll(el, dur){ return new Promise(res=>{ const s=performance.now(), max=el.scrollHeight-el.clientHeight; if(max<=0){res();return;} function step(t){ const p=Math.min(1,(t-s)/dur); const e=p<.5?2*p*p:1-Math.pow(-2*p+2,2)/2; el.scrollTop=max*e; setBar(.55+.4*p); if(p<1) requestAnimationFrame(step); else res(); } requestAnimationFrame(step); }); }
+
+async function run(){
+  await wait(3500); setBar(.05);
+  document.getElementById('title').classList.add('hide');
+  document.getElementById('app').classList.add('show');
+  pad.innerHTML = FORM;
+  await wait(1100);
+  document.getElementById('f_cult').textContent = "Рапс яровой";
+  await wait(350);
+  document.getElementById('f_reg').textContent = "Ленинск-Кузнецкий р-н, Кузбасс";
+  await wait(350);
+  document.getElementById('f_soil').textContent = "чернозём, слабощелочная pH";
+  await wait(800); setBar(.15);
+  await type(document.getElementById('f_lab'), "K — очень высокий · N — лимитирует · S — дефицит · P — местами низкий", 24);
+  setBar(.3);
+  await wait(500);
+  await type(document.getElementById('f_free'), QUERY, 20);
+  setBar(.42);
+  await wait(1300);
+  const go=document.getElementById('go'); go.classList.add('pulse');
+  await wait(1500); setBar(.48);
+  pad.innerHTML = CHAT;
+  await wait(3800); setBar(.55);
+  pad.innerHTML = PKG;
+  const scroll = document.querySelector('.scroll');
+  await wait(2200);
+  await autoScroll(scroll, 30000);
+  await wait(1400); setBar(1);
+  document.getElementById('end').classList.remove('hide');
+}
+run();
+</script>
+</body>
+</html>
